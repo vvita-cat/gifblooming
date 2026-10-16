@@ -1,20 +1,17 @@
-
 <script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
 <script>
-  /* global nn */
   let flowerColor, backgroundColor
 
   function setup () {
-    // pick two random colors
     flowerColor = nn.randomColor()
     backgroundColor = nn.randomColor()
 
-    // change minimum contrast ratio to 3
-    while (nn.colorContrast(flowerColor, backgroundColor) < 3) {
+    let attempts = 0
+    while (nn.colorContrast(flowerColor, backgroundColor) < 3 && attempts < 100) {
       flowerColor = nn.randomColor()
+      attempts++
     }
 
-    // update body's content and styles
     nn.get('body')
       .content('Blooming Flowers')
       .css({
@@ -22,47 +19,51 @@
         background: backgroundColor,
         overflow: 'hidden',
         height: '100vh',
+        margin: 0,
         display: 'grid',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 72
+        fontSize: 72,
+        fontFamily: 'sans-serif',
+        userSelect: 'none'
       })
 
-    // run the createGif function 60 times
     nn.times(60, createGif)
   }
 
   function createGif () {
-    // create a random x,y position
-    const x = nn.random(-100, nn.width + 100)
-    const y = nn.random(-100, nn.height + 100)
+    const x = nn.random(-50, nn.width - 50)
+    const y = nn.random(-50, nn.height - 50)
     const r = nn.random(360)
     const c = nn.toHSL(flowerColor)
 
-    // create an img element for our flower gif
     nn.create('img')
       .set('src', 'flower.gif')
+      .size(75, 75)
       .addTo('body')
       .position(x, y)
       .rotate(r)
-      .hueRotate(60 - c.h)
+      .hueRotate(c.h - 60)
       .saturate(c.s / 100)
-      .brightness(c.l / 100)
+      .brightness(Math.max(0.4, c.l / 50))
       .css({
-        cursor: 'grab',
+        cursor: 'pointer',
         userSelect: 'none',
         transition: 'all 1.5s ease-out'
       })
+      .on('click', function (e) {
+        e.stopPropagation()
+      })
       .on('mouseover', async function () {
+        this.css({ pointerEvents: 'none', opacity: 0 })
         this.scale(3)
-        this.css('opacity', 0)
         this.rotate(r - 180)
         await nn.sleep(1500)
         this.remove()
-      })
+      }, { once: true })
   }
 
-  function update () {
+ function update () {
     nn.getAll('img').forEach(img => img.remove())
     setup()
   }
@@ -74,4 +75,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
 
